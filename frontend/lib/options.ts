@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import googleprovider from "next-auth/providers/google"
 import type { NextAuthOptions } from "next-auth";
+import axios from "axios";
+import { apiclient } from "@/api_client/axios";
 export const options:NextAuthOptions = {
   providers: [
     googleprovider({
@@ -18,7 +20,9 @@ export const options:NextAuthOptions = {
   callbacks:{
     async signIn({ user, account, profile, email, credentials}){
         if(account?.provider==='google'){
-          
+          apiclient.post('/sign-in',{
+            
+          })
         }
         return true;
     },
