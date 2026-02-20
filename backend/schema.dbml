@@ -1,0 +1,55 @@
+table question {
+  id integer [pk, not null]
+  question text [not null]
+  survey_id integer [not null]
+  ans text
+}
+
+table option {
+  id integer [pk, not null]
+  data text [not null]
+  question_id integer
+  poll_id integer
+}
+
+table poll {
+  id integer [pk, not null]
+  statement text [not null]
+  expiry numeric [not null]
+  user_id text
+}
+
+table survey {
+  id integer [pk, not null]
+  user_id text
+  expiry numeric
+}
+
+table user {
+  id text [pk, not null]
+  name text [not null]
+  email text [not null, unique]
+  refreshToken text
+  password text [not null]
+}
+
+table votes {
+  id integer [pk, not null]
+  user_id text
+  poll_id integer
+  option_id integer
+  is_public integer
+  anonymous integer
+}
+
+ref: option.question_id > question.id
+
+ref: option.poll_id - poll.id
+
+ref: question.survey_id > survey.id
+
+ref: votes.poll_id > poll.id
+
+ref: votes.option_id - option.id
+
+ref: votes.user_id - user.id

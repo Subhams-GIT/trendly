@@ -21,15 +21,8 @@ export const Question = sqliteTable("question", {
   question: text("question").notNull(),
   surveyId: int("survey_id")
     .notNull()
-    .references(() => survey.id),            
+    .references(() => survey.id),
   response: text("ans"),
-});
-
-
-export const poll = sqliteTable("poll", {
-  id: int("id").primaryKey(),
-  statement: text("statement").notNull(),
-  expiry: numeric("expiry", { mode: "number" }).notNull(),
 });
 
 
@@ -48,4 +41,10 @@ export const votes = sqliteTable("votes", {
   optionId: integer("option_id").references(() => option.id),
   isPublic: integer("is_public", { mode: "boolean" }),
   anonymous: integer("anonymous", { mode: "boolean" }),
+});
+export const poll = sqliteTable("poll", {
+  id: int("id").primaryKey(),
+  statement: text("statement").notNull(),
+  expiry: numeric("expiry", { mode: "number" }).notNull(),
+  userId:text("user_id").references(()=>usersTable.id)
 });

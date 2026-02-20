@@ -3,6 +3,7 @@
   "packageManager": "yarn@4.12.0",
   "type": "module",
   "scripts": {
+    "dbml": "tsx ./src/dbml.ts",
     "dev": "tsx --watch src/index.ts"
   },
   "dependencies": {

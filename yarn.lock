@@ -2644,6 +2644,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"drizzle-dbml-generator@npm:^0.10.0":
+  version: 0.10.0
+  resolution: "drizzle-dbml-generator@npm:0.10.0"
+  peerDependencies:
+    drizzle-orm: ">=0.36.0"
+  checksum: 10c0/67c0d05bde24ecb67a22f315e393c65e463b448701b6562314d02a6bc681e0b603bf8f6b88d407cd439b3bd9336b042f3f596cee46282ebe574b6cfb5ebaa3bd
+  languageName: node
+  linkType: hard
+
 "drizzle-kit@npm:^0.31.9":
   version: 0.31.9
   resolution: "drizzle-kit@npm:0.31.9"
@@ -6157,6 +6166,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "trendly@workspace:."
   dependencies:
+    drizzle-dbml-generator: "npm:^0.10.0"
     next-auth: "npm:^4.24.13"
   languageName: unknown
   linkType: soft

@@ -1,0 +1,1 @@
+ALTER TABLE `poll` ADD `user_id` text REFERENCES user(id);

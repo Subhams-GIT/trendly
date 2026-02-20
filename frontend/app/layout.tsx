@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SessionWrapper from "./_components/Wrapper";
-
+import Nav from "./_components/Layout/nav";
+import { getServerSession } from "next-auth";
+import { options } from "@/lib/options";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -23,6 +25,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  getServerSession(options).then((session)=>{
+    console.log(session)
+  }).catch((err)=>{
+    console.log(err)
+  })
   return (
 
        <SessionWrapper>
@@ -34,6 +41,6 @@ export default function RootLayout({
         </body>
       </html>
     </SessionWrapper>
-   
+
   );
 }
