@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { survey, Question, option, poll, votes, usersTable } from "./schema";
+import { survey, Question, option, poll, votes, usersTable, answer, answerOption } from "./schema";
 
 /* Survey ↔ Question */
 export const surveyRelations = relations(survey, ({ many,one }) => ({
@@ -16,10 +16,11 @@ export const questionRelations = relations(Question, ({ one, many }) => ({
     references: [survey.id],
   }),
   options: many(option),
+  answers: many(answer)
 }));
 
 /* Question ↔ Option */
-export const optionRelations = relations(option, ({ one }) => ({
+export const optionRelations = relations(option, ({ one,many }) => ({
   question: one(Question, {
     fields: [option.questionId],
     references: [Question.id],
@@ -27,6 +28,30 @@ export const optionRelations = relations(option, ({ one }) => ({
   poll: one(poll, {
     fields: [option.pollId],
     references: [poll.id],
+  }),
+  answerSelections: many(answerOption)
+}));
+
+export const answerRelations = relations(answer, ({ one, many }) => ({
+  question: one(Question, {
+    fields: [answer.questionId],
+    references: [Question.id],
+  }),
+  user: one(usersTable, {
+    fields: [answer.userId],
+    references: [usersTable.id],
+  }),
+  selectedOptions: many(answerOption),
+}));
+
+export const answerOptionRelations = relations(answerOption, ({ one }) => ({
+  answer: one(answer, {
+    fields: [answerOption.answerId],
+    references: [answer.id],
+  }),
+  option: one(option, {
+    fields: [answerOption.optionId],
+    references: [option.id],
   }),
 }));
 
