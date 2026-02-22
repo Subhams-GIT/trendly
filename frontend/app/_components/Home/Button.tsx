@@ -7,6 +7,7 @@ interface ButtonProps {
   className: string;
 }
 const Button = (props: ButtonProps) => {
+
   return (
     <div className={props.className} onClick={props.callback}>
       {props.label}

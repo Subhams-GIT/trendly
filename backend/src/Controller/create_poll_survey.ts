@@ -2,8 +2,13 @@ import { ServerResponse } from "http";
 import type { customRequest } from "../global";
 import { bodyParser } from "../middleware/bodyParser";
 import { dbClient } from "../db/db";
-import { survey,Question } from "../db/schema";
+import { survey, Question, option as Option, usersTable } from "../db/schema";
 import { parseCookies } from "../utils/cookie";
+import { type question } from "../types/types";
+import { eq, type InferInsertModel } from "drizzle-orm";
+type OptionInsert = InferInsertModel<typeof Option>;
+type QuestionInsert = InferInsertModel<typeof Question>;
+
 export async function create_survey_poll(req: customRequest, response: ServerResponse) {
     try {
         const isAllowed = await bodyParser(req);
@@ -12,9 +17,7 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
         // const cookies=req.headers.cookie;
         const parsed_cookies = parseCookies(req);
         const doesUserExist = await client.query.usersTable.findFirst({
-            with: {
-                id: parsed_cookies.id,
-            }
+            where: eq(usersTable.id, parsed_cookies.id!)
         })
         if (!doesUserExist) {
             response.writeHead(500, {
@@ -34,10 +37,29 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
                 state,
                 visibility
             };
-            const saved=await client.insert(survey).values(save_survey).returning({id:survey.id});
-            if(saved.length==0 || !saved[0]) return
-            const surveyId=saved[0].id
-            await client.insert(Question).values([{surveyId,question:Questions[0]}])
+            const options: QuestionInsert = Questions.map((q: question) => ({
+                question: q.statement,
+                surveyId: save_survey.id,
+                type: q.type,
+            }))
+            await client.transaction(async tx => {
+                const [newSurvey] = await tx.insert(survey).values(save_survey).returning();
+                const inserted_Questions = await tx.insert(Question).values(
+                    Questions).returning()
+
+                const optionsValues: OptionInsert[] = inserted_Questions.flatMap(
+                    (insertedQ, index) =>
+                        Questions[index].option?.map((opt: string) => ({
+                            data: opt,
+                            questionId: insertedQ.id,
+                        })) ?? []
+                );
+
+                if (optionsValues.length > 0) {
+                    await tx.insert(Option).values(optionsValues);
+                }
+            })
+
         }
         response.writeHead(200, {
             'content-type': 'application/json'
@@ -47,6 +69,8 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
         }))
         response.end()
     } catch (error) {
-        return
+        console.error(error);
+        response.writeHead(500);
+        response.end();
     }
 }

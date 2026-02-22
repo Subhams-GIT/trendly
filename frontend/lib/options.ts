@@ -58,11 +58,12 @@ export const options: NextAuthOptions = {
     async signIn({ user, account, profile, email, credentials }) {
       try {
         if (account?.provider === "google") {
-          const newuser = await apiclient.post("http://localhost:3001/sign-in", {
+          const newuser = await apiclient.post("/sign-in", {
             name: profile?.name,
-            email:profile?.email,
-            token: account.refresh_token,
+            email: profile?.email,
           });
+          console.log(newuser)
+          debugger;
           user.id = newuser.data.id;
           user.email = newuser.data.email;
           user.name = newuser.data.name;
@@ -74,10 +75,10 @@ export const options: NextAuthOptions = {
       }
     },
     async session({ session, token, user }) {
-      if(session.user){
-        session.user.email=token.email
-        session.user.name=token.name
-        session.user.id=token.id as string
+      if (session.user) {
+        session.user.email = token.email
+        session.user.name = token.name
+        session.user.id = token.id as string
       }
       return session;
     },
@@ -97,7 +98,7 @@ export const options: NextAuthOptions = {
   jwt: {
     secret: process.env.NEXTAUTH_SECRET!,
   },
-  pages:{
-    signIn:'/signin'
+  pages: {
+    signIn: '/signin'
   }
 };

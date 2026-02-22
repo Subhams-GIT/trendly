@@ -7,6 +7,7 @@ import { bodyParser } from "../middleware/bodyParser";
 // har ek url me diff type of data recceive ho sakta hai to i need to have a function which takes the request object and process the body based on the url and method.
 export default async function Router(req: customRequest, res: http.ServerResponse) {
     const url = req.url;
+    await bodyParser(req);
     switch (url) {
         case '/create':
             create_survey_poll(req, res);
