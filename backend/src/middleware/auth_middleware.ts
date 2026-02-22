@@ -1,9 +1,19 @@
-import * as jwt from 'jsonwebtoken'
-import * as http from 'http';
+import * as jose from 'jose'
+import { decode } from 'next-auth/jwt';
+export default async function authenticate(cookie: any): Promise<boolean> {
+    try {
+        const session_token = cookie["next-auth.session-token"]
+            || cookie["__Secure-next-auth.session-token"]; // for production
 
-export default function authenticate(req: http.IncomingMessage) {
-    const auth = req.headers.authorization;
-    if (!auth) throw new Error("unauthorized");
-    const token = auth.split(" ")[1];
-    if (token) return JSON.stringify(jwt.verify(token, process.env.JWT_SECRET!));
+        if (!session_token) return false;
+        console.log(session_token)
+        const payload=await decode({token:session_token,secret:process.env.NEXTAUTH_SECRET!});
+        console.log({payload})
+        if (!payload) return false;
+
+        return true;
+    } catch (error) {
+        console.error("Auth error:", error);
+        return false;
+    }
 }

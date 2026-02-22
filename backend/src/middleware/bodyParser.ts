@@ -1,5 +1,6 @@
+import type { ServerResponse } from "http";
 import type { customRequest } from "../global";
-export function bodyParser(req: customRequest): Promise<any> {
+export function bodyParser(req: customRequest,res:ServerResponse): Promise<any> {
     const contentType: string = req.headers["content-type"] as string;
     return new Promise((resolve, reject) => {
         let rawBody: any = [];
@@ -20,6 +21,7 @@ export function bodyParser(req: customRequest): Promise<any> {
                 resolve(parsedBody);
             } catch (err) {
                 reject(err);
+                return ;
             }
         });
 

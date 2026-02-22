@@ -11,10 +11,10 @@ type QuestionInsert = InferInsertModel<typeof Question>;
 
 export async function create_survey_poll(req: customRequest, response: ServerResponse) {
     try {
-        const isAllowed = await bodyParser(req);
+        const isAllowed = await bodyParser(req,response);
         const client = dbClient.getInstance();
         const { title, description, state, visibility, Questions, expiry } = req.body;
-        // const cookies=req.headers.cookie;
+        console.log({body:req.body})
         const parsed_cookies = parseCookies(req);
         const doesUserExist = await client.query.usersTable.findFirst({
             where: eq(usersTable.id, parsed_cookies.id!)
@@ -29,11 +29,12 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
             response.end()
         }
         else {
+            const today=new Date();
             const save_survey: typeof survey.$inferInsert = {
                 title,
                 description,
                 userId: doesUserExist.id,
-                expiry,
+                expiry:today+expiry,
                 state,
                 visibility
             };
@@ -71,6 +72,9 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
     } catch (error) {
         console.error(error);
         response.writeHead(500);
+        response.write(JSON.stringify({
+            message:error
+        }))
         response.end();
     }
 }
