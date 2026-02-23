@@ -1,4 +1,4 @@
-import type { SQLiteTimestamp } from "drizzle-orm/sqlite-core"
+
 
 export enum visibility{
     public,
@@ -16,8 +16,8 @@ export enum voteMode{
 
 export enum type_question{
     text,
-    single_option,
-    multiple_option
+    single,
+    multiple
 }
 export type chunk=Buffer|Uint8Array<ArrayBufferLike>
 
@@ -30,17 +30,15 @@ export interface Cookie{
     [key:string]:string,
 }
 export interface option{
-    text:string,
-    question_id:number,
-    vote_count:number,
-
+    data:string,
+    questionId:string,
 }
 
 export interface question{
     statement:string,
     survey_id:string,
-    option?:option
-    type:type_question
+    type:type_question,
+    option?:option[]
 }
 
 

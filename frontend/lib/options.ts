@@ -56,23 +56,10 @@ export const options: NextAuthOptions = {
 
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
-      try {
-        if (account?.provider === "google") {
-          const newuser = await apiclient.post("/sign-in", {
-            name: profile?.name,
-            email: profile?.email,
-          });
-          console.log(newuser)
-          debugger;
-          user.id = newuser.data.id;
-          user.email = newuser.data.email;
-          user.name = newuser.data.name;
-        }
-        return true;
-      } catch (error: AxiosResponse | any | AxiosError) {
-        console.error(error);
-        return false;
+      if (account?.provider === "google" && profile?.email) {
+        return true; // actual DB call moved to jwt
       }
+      return false;
     },
     async session({ session, token, user }) {
       if (session.user) {
@@ -83,12 +70,23 @@ export const options: NextAuthOptions = {
       return session;
     },
     async jwt({ token, user, account, trigger }) {
-      if (user) {
-        token.name = user.name
-        token.email = user.email
-        token.id = user.id
+      try {
+        if (account && user) {
+          const newuser = await apiclient.post("/sign-in", {
+            name: token?.name,
+            email: token?.email,
+          });
+          token.id = newuser.data.id;
+          token.name = newuser.data.name;
+          token.email = newuser.data.email;
+        }
+        return token
       }
-      return token
+      catch (error) {
+        console.error(error);
+        throw new Error("sign in unsucessfull")
+      }
+
     },
   },
   session: {

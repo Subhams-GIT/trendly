@@ -8,10 +8,10 @@ import { eq } from "drizzle-orm";
 
 export async function sign_in(req: customRequest, res: ServerResponse) {
     try {
-        
+
         const client = dbClient.getInstance();
         console.log(req.body)
-        const { email, name} = req.body;
+        const { email, name } = req.body;
         if (!email.trim() || !name.trim()) throw new ApiError("not found", "details incomplete")
         const doesUSerExist = await client.query.usersTable.findFirst({
             where: eq(usersTable.email, email)
@@ -34,17 +34,15 @@ export async function sign_in(req: customRequest, res: ServerResponse) {
             password: randomBytes(16).toString("hex"),
         };
         console.log("reached!")
-        await client.insert(usersTable).values(user)
-        const savedUser = await client.query.usersTable.findFirst({
-                where:eq(email,usersTable.email)
-        })
+        const savedUser=await client.insert(usersTable).values(user).returning({ id: usersTable.id, email: usersTable.email,
+            name: usersTable.name })
         res.writeHead(200, {
             "content-type": "application/json"
         });
         res.write(JSON.stringify({
-            id: savedUser?.id,
-            email: savedUser?.email,
-            name: savedUser?.name,
+            id: savedUser[0]?.id,
+            email: savedUser[0]?.email,
+            name: savedUser[0]?.name,
         }));
         res.end();
     } catch (error: ApiError | any) {

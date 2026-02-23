@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { int, integer,sqliteTable, text } from "drizzle-orm/sqlite-core";
-
+import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export const usersTable = sqliteTable("user", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
@@ -12,82 +11,66 @@ export const usersTable = sqliteTable("user", {
 
 export const survey = sqliteTable("survey", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
-  userId: text("user_id").references(() => usersTable.id).notNull(),
+  userId: text("user_id").notNull().references(() => usersTable.id),
   expiry: integer("expiry", { mode: "timestamp" }),
   title: text("title"),
   description: text("description"),
-  state: text("state", {
-    enum: ["open", "closed", "archieved"]
-  }).notNull().default("open"),
-  visibility: text("visibility", {
-    enum: ["public", "private"]
-  }).notNull().default("public")
+  state: text("state", { enum: ["open", "closed", "archived"] }).notNull().default("open"),
+  visibility: text("visibility", { enum: ["public", "private"] }).notNull().default("public"),
+  link:text("survey_link").notNull().unique()
 });
 
-export const Question = sqliteTable("question", {
-  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+export const question = sqliteTable("question", {
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  surveyId: text("survey_id").notNull().references(() => survey.id),
   question: text("question").notNull(),
-  surveyId: text("survey_id")
-    .notNull()
-    .references(() => survey.id),
+  type: text("type", { enum: ["single", "multi", "text"] }).notNull().default("text"),
 });
 
 
-export const option = sqliteTable("option", {
-  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
+export const questionOption = sqliteTable("question_option", {
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  questionId: text("question_id").notNull().references(() => question.id),
   data: text("data").notNull(),
-  questionId: int("question_id").references(() => Question.id).notNull(),
-  vote_count:integer("vote_count").default(0)
+});
+
+
+export const surveySubmission = sqliteTable("survey_submission", {
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  surveyId: text("survey_id").notNull().references(() => survey.id),
+  userId: text("user_id").notNull().references(() => usersTable.id),
+  submittedAt: integer("submitted_at", { mode: "timestamp" }).notNull(),
+}, (t) => [unique().on(t.surveyId, t.userId)]);
+
+export const answer = sqliteTable("answer", {
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  submissionId: text("submission_id").notNull().references(() => surveySubmission.id),
+  questionId: text("question_id").notNull().references(() => question.id),
+  response: text("response", { mode: "json" }).notNull(),
 });
 
 
 export const poll = sqliteTable("poll", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
-
+  userId: text("user_id").notNull().references(() => usersTable.id),
   statement: text("statement").notNull(),
-
-  userId: text("user_id")
-    .notNull()
-    .references(() => usersTable.id),
-
   expiry: integer("expiry", { mode: "timestamp" }).notNull(),
-
-  state: text("state", {
-    enum: ["open", "closed", "archived"],
-  }).notNull().default("open"),
-
-  visibility: text("visibility", {
-    enum: ["public", "private"], // private -> visible to a set of users only based on regex pattern
-  }).notNull().default("public"),
-
-  voteMode: text("vote_mode", {
-    enum: ["anonymous", "authenticated"],
-  }).notNull().default("authenticated"),
+  state: text("state", { enum: ["open", "closed", "archived"] }).notNull().default("open"),
+  visibility: text("visibility", { enum: ["public", "private"] }).notNull().default("public"),
+  voteMode: text("vote_mode", { enum: ["anonymous", "authenticated"] }).notNull().default("authenticated"),
 });
 
 
-export const votes = sqliteTable("votes", {
+export const pollOption = sqliteTable("poll_option", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  pollId: text("poll_id").notNull().references(() => poll.id),
+  data: text("data").notNull(),
+  voteCount: integer("vote_count").notNull().default(0),
+});
+
+export const vote = sqliteTable("vote", {
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  pollId: text("poll_id").notNull().references(() => poll.id),
+  pollOptionId: text("poll_option_id").notNull().references(() => pollOption.id),
   userId: text("user_id").references(() => usersTable.id),
-  pollId: integer("poll_id").references(() => poll.id),
-  optionId: integer("option_id").references(() => option.id),
-});
-
-/*
-votes -> public -> authenticated , anonymous
-      -> private -> authenticated votes,
- */
-
-
-export const answer = sqliteTable("answer", {
-  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-  userId: text("user_id")
-    .notNull()
-    .references(() => usersTable.id),
-
-  questionId: int("question_id")
-    .notNull()
-    .references(() => Question.id),
-
-  response: text("response", { mode: "json" }).notNull()
-});
+}, (t) => [unique().on(t.pollId, t.userId)]);

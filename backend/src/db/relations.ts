@@ -1,72 +1,105 @@
 import { relations } from "drizzle-orm";
-import { survey, Question, option, poll, votes, usersTable, answer} from "./schema";
+import {
+  usersTable,
+  survey,
+  question,
+  questionOption,
+  surveySubmission,
+  answer,
+  poll,
+  pollOption,
+  vote,
+} from "./schema";
 
-/* Survey ↔ Question */
-export const surveyRelations = relations(survey, ({ many,one }) => ({
-  questions: many(Question),
-   user: one(usersTable, {
+// ─── USER ──────────────────────────────────────────────────────────────────
+
+export const userRelations = relations(usersTable, ({ many }) => ({
+  surveys: many(survey),
+  polls: many(poll),
+  surveySubmissions: many(surveySubmission),
+  votes: many(vote),
+}));
+
+// ─── SURVEY ────────────────────────────────────────────────────────────────
+
+export const surveyRelations = relations(survey, ({ one, many }) => ({
+  user: one(usersTable, {
     fields: [survey.userId],
     references: [usersTable.id],
   }),
+  questions: many(question),
+  submissions: many(surveySubmission),
 }));
 
-export const questionRelations = relations(Question, ({ one, many }) => ({
+export const questionRelations = relations(question, ({ one, many }) => ({
   survey: one(survey, {
-    fields: [Question.surveyId],
+    fields: [question.surveyId],
     references: [survey.id],
   }),
-  options: many(option),
-  answers: many(answer)
+  options: many(questionOption),
+  answers: many(answer),
 }));
 
-/* Question ↔ Option */
-export const optionRelations = relations(option, ({ one,many }) => ({
-  question: one(Question, {
-    fields: [option.questionId],
-    references: [Question.id],
-  })
+export const questionOptionRelations = relations(questionOption, ({ one }) => ({
+  question: one(question, {
+    fields: [questionOption.questionId],
+    references: [question.id],
+  }),
 }));
 
-export const answerRelations = relations(answer, ({ one, many }) => ({
-  question: one(Question, {
-    fields: [answer.questionId],
-    references: [Question.id],
+export const surveySubmissionRelations = relations(surveySubmission, ({ one, many }) => ({
+  survey: one(survey, {
+    fields: [surveySubmission.surveyId],
+    references: [survey.id],
   }),
   user: one(usersTable, {
-    fields: [answer.userId],
+    fields: [surveySubmission.userId],
     references: [usersTable.id],
+  }),
+  answers: many(answer),
+}));
+
+export const answerRelations = relations(answer, ({ one }) => ({
+  submission: one(surveySubmission, {
+    fields: [answer.submissionId],
+    references: [surveySubmission.id],
+  }),
+  question: one(question, {
+    fields: [answer.questionId],
+    references: [question.id],
   }),
 }));
 
+// ─── POLL ──────────────────────────────────────────────────────────────────
 
-/* Poll ↔ Votes */
-export const pollRelations = relations(poll, ({ many,one }) => ({
-  votes: many(votes),
+export const pollRelations = relations(poll, ({ one, many }) => ({
   user: one(usersTable, {
     fields: [poll.userId],
     references: [usersTable.id],
   }),
+  options: many(pollOption),
+  votes: many(vote),
 }));
 
-export const votesRelations = relations(votes, ({ one }) => ({
+export const pollOptionRelations = relations(pollOption, ({ one, many }) => ({
   poll: one(poll, {
-    fields: [votes.pollId],
+    fields: [pollOption.pollId],
     references: [poll.id],
   }),
-  option: one(option, {
-    fields: [votes.optionId],
-    references: [option.id],
-  }),
-  user:one(usersTable,{
-    fields:[votes.userId],
-    references:[usersTable.id]
-  })
+  votes: many(vote),
 }));
 
-export const userRelations=relations(usersTable,({many})=>({
-  surveys:many(survey),
-}))
-
-export const user_to_polls=relations(usersTable,({many})=>({
-  polls:many(poll)
-}))
+export const voteRelations = relations(vote, ({ one }) => ({
+  poll: one(poll, {
+    fields: [vote.pollId],
+    references: [poll.id],
+  }),
+  pollOption: one(pollOption, {
+    fields: [vote.pollOptionId],
+    references: [pollOption.id],
+  }),
+  user: one(usersTable, {
+    fields: [vote.userId],
+    references: [usersTable.id],
+  }),
+}));

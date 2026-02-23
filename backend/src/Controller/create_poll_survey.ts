@@ -2,22 +2,20 @@ import { ServerResponse } from "http";
 import type { customRequest } from "../global";
 import { bodyParser } from "../middleware/bodyParser";
 import { dbClient } from "../db/db";
-import { survey, Question, option as Option, usersTable } from "../db/schema";
-import { parseCookies } from "../utils/cookie";
-import { type question } from "../types/types";
+import { survey, usersTable, questionOption, question } from "../db/schema";
+import { type question as q, type option } from "../types/types";
 import { eq, type InferInsertModel } from "drizzle-orm";
-type OptionInsert = InferInsertModel<typeof Option>;
-type QuestionInsert = InferInsertModel<typeof Question>;
+import { randomBytes } from "crypto";
+type OptionInsert = InferInsertModel<typeof questionOption>;
+type QuestionInsert = InferInsertModel<typeof question>;
 
 export async function create_survey_poll(req: customRequest, response: ServerResponse) {
     try {
-        const isAllowed = await bodyParser(req,response);
         const client = dbClient.getInstance();
         const { title, description, state, visibility, Questions, expiry } = req.body;
-        console.log({body:req.body})
-        const parsed_cookies = parseCookies(req);
+        console.log({ body: req.body })
         const doesUserExist = await client.query.usersTable.findFirst({
-            where: eq(usersTable.id, parsed_cookies.id!)
+            where: eq(usersTable.id, req.user?.id as string)
         })
         if (!doesUserExist) {
             response.writeHead(500, {
@@ -29,35 +27,40 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
             response.end()
         }
         else {
-            const today=new Date();
+            const link=randomBytes(32).toString("hex");
             const save_survey: typeof survey.$inferInsert = {
                 title,
                 description,
                 userId: doesUserExist.id,
-                expiry:today+expiry,
+                expiry: new Date(),
                 state,
-                visibility
+                visibility,
+                link
             };
-            const options: QuestionInsert = Questions.map((q: question) => ({
-                question: q.statement,
-                surveyId: save_survey.id,
-                type: q.type,
-            }))
+
             await client.transaction(async tx => {
-                const [newSurvey] = await tx.insert(survey).values(save_survey).returning();
-                const inserted_Questions = await tx.insert(Question).values(
-                    Questions).returning()
+                const [newSurvey] = await tx.insert(survey).values(save_survey).returning({ id: survey.id });
+                const questions: typeof question.$inferInsert = Questions.map((q: q) => ({
+                    question: q.statement,
+                    surveyId: newSurvey?.id,
+                    type: q.type,
+                }))
 
-                const optionsValues: OptionInsert[] = inserted_Questions.flatMap(
-                    (insertedQ, index) =>
-                        Questions[index].option?.map((opt: string) => ({
-                            data: opt,
-                            questionId: insertedQ.id,
-                        })) ?? []
-                );
+                const inserted_Questions = await tx.insert(question).values(
+                    questions).returning({ id: question.id, type: question.type, text: question.question })
 
-                if (optionsValues.length > 0) {
-                    await tx.insert(Option).values(optionsValues);
+                const options_to_insert = inserted_Questions
+                    .filter(q => q.type === "multi" || q.type === "single")
+                    .flatMap(q => {
+                        const original = Questions.find((i: q) => i.statement === q.text);
+                        return original?.options?.map((opt: any) => ({
+                            questionId: q.id,
+                            value: opt.value,  
+                        })) ?? [];
+                    });
+
+                if (options_to_insert.length > 0) {
+                    await tx.insert(questionOption).values(options_to_insert);
                 }
             })
 
@@ -73,7 +76,7 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
         console.error(error);
         response.writeHead(500);
         response.write(JSON.stringify({
-            message:error
+            message: error
         }))
         response.end();
     }
