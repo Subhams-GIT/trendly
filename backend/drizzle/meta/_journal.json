@@ -85,6 +85,13 @@
       "when": 1771837313359,
       "tag": "0011_high_demogoblin",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1771848125024,
+      "tag": "0012_spooky_stark_industries",
+      "breakpoints": true
     }
   ]
 }

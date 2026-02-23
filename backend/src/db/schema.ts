@@ -31,7 +31,7 @@ export const question = sqliteTable("question", {
 export const questionOption = sqliteTable("question_option", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   questionId: text("question_id").notNull().references(() => question.id),
-  data: text("data").notNull(),
+  data: text("data",{mode:"json"}).notNull(),
 });
 
 
