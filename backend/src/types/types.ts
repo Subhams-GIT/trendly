@@ -62,3 +62,8 @@ export interface answer{
     questionId:number,
     response:string
 }
+
+export type pollOption={
+    data:string,
+    pollId:string,
+}

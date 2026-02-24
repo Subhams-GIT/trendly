@@ -3,10 +3,10 @@ import type { customRequest } from "../global";
 import { dbClient } from "../db/db";
 import { survey, usersTable, questionOption, question } from "../db/schema";
 import { type question as qu, type option } from "../types/types";
-import { eq, type InferInsertModel } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { randomBytes } from "crypto";
 type OptionInsert = typeof questionOption.$inferInsert;
-type QuestionInsert = InferInsertModel<typeof question>;
+
 
 export async function create_survey_poll(req: customRequest, response: ServerResponse) {
     try {
@@ -48,15 +48,6 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
                 const inserted_Questions = await tx.insert(question).values(
                     questions).returning({ id: question.id, type: question.type, text: question.question })
 
-                // const options_to_insert:OptionInsert[] = inserted_Questions
-                //     .filter(q => q.type === "multi" || q.type === "single")
-                //     .flatMap(q => {
-                //         const original = Questions.find((i: qu) => i.statement === q.text);
-                //         return original?.options?.map((opt: any) => ({
-                //             questionId: q.id,
-                //             value: opt.value,
-                //         })) ?? [];
-                //     });
                 console.log(inserted_Questions);
                 const options_questions = inserted_Questions.filter(iq =>
                     iq.type !== "text"
@@ -84,7 +75,7 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
             'content-type': 'application/json'
         })
         response.write(JSON.stringify({
-            message: "poll created"
+            message: "survey created"
         }))
         response.end()
     } catch (error) {
