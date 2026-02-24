@@ -7,9 +7,7 @@ export default async function authenticate(req:customRequest, cookie: any): Prom
             || cookie["__Secure-next-auth.session-token"]; // for production
 
         if (!session_token) return null;
-        console.log(session_token)
         const payload=await decode({token:session_token,secret:process.env.NEXTAUTH_SECRET!}) as unknown as JWTPayload;
-        console.log({payload})
         if (!payload) return null;
         req.user=payload;
         return payload;

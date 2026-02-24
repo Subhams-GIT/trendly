@@ -6,7 +6,8 @@ export interface customRequest extends IncomingMessage{
         id:string,
         name:string,
         email:string,
-    }
+    },
+    queryparams:URLSearchParams
 }
 
 export type JWTPayload={

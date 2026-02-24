@@ -3,10 +3,11 @@ import type { customRequest } from "../global";
 import { dbClient } from "../db/db";
 import { poll, pollOption, usersTable } from "../db/schema";
 import { eq } from "drizzle-orm";
-import type { pollOption as po } from "../types/types";
+import type { pollOption as po ,visibility as v} from "../types/types";
 export async function create_poll(req: customRequest, response: ServerResponse) {
     try {
-        // options:["1","2","3","4"]-> [{}]
+        const user=req.user;
+        if(!user?.id) throw new Error("user id not found!");
         const client = dbClient.getInstance();
         const { statement, expiry, state, visibility, voteMode, options } = req.body;
 
@@ -23,6 +24,7 @@ export async function create_poll(req: customRequest, response: ServerResponse) 
             }))
             response.end()
         } else {
+            if(visibility=="public")
             client.transaction(async tx => {
                 const saved_poll: typeof poll.$inferInsert = {
                     statement,

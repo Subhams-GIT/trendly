@@ -2,11 +2,12 @@ import { ServerResponse } from "http";
 import type { customRequest } from "../global";
 import { dbClient } from "../db/db";
 import { survey, usersTable, questionOption, question } from "../db/schema";
-import { type question as qu, type option } from "../types/types";
+import { type question as qu } from "../types/types";
 import { eq } from "drizzle-orm";
 import { randomBytes } from "crypto";
 type OptionInsert = typeof questionOption.$inferInsert;
 
+// url ->
 
 export async function create_survey_poll(req: customRequest, response: ServerResponse) {
     try {
@@ -31,7 +32,7 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
                 title,
                 description,
                 userId: doesUserExist.id,
-                expiry: new Date(),
+                expiry: new Date(Date.now() + expiry),
                 state,
                 visibility,
                 link
@@ -48,7 +49,7 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
                 const inserted_Questions = await tx.insert(question).values(
                     questions).returning({ id: question.id, type: question.type, text: question.question })
 
-                console.log(inserted_Questions);
+                //console.log(inserted_Questions);
                 const options_questions = inserted_Questions.filter(iq =>
                     iq.type !== "text"
                 );
@@ -62,7 +63,7 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
                     );
                     if (res) {
                         options.push({
-                            data: {...q.option},
+                            data: { ...q.option },
                             questionId: res.id
                         });
                     }
@@ -85,5 +86,39 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
             message: error
         }))
         response.end();
+    }
+}
+
+
+export const get_Survey = async (req: customRequest, res: ServerResponse) => {
+    try {
+        const userid: string | undefined = req.user?.id;
+        console.log(req.url);
+        if (!userid) throw new Error("user not found!");
+        const client = dbClient.getInstance();
+        const res_survey = await client.query.survey.findMany({
+            where: eq(survey.userId, userid)
+        })
+        if (!res_survey) {
+            res.writeHead(404, {
+                "content-type": "application/json"
+            });
+            res.end(JSON.stringify({ error: "Survey not found" }));
+            return;
+        }
+        res.writeHead(200, {
+            "content-type": "application/json"
+        })
+        res.write(JSON.stringify({
+            survey: res_survey
+        }))
+        res.end();
+    } catch (error) {
+        console.error("poll not created", error);
+        res.writeHead(500, {
+            message: error as string
+        })
+        res.write(JSON.stringify({ error }))
+        res.end();
     }
 }

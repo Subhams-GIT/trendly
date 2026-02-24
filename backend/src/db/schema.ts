@@ -74,3 +74,5 @@ export const vote = sqliteTable("vote", {
   pollOptionId: text("poll_option_id").notNull().references(() => pollOption.id),
   userId: text("user_id").references(() => usersTable.id),
 }, (t) => [unique().on(t.pollId, t.userId)]);
+
+
