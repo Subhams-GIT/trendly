@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { integer, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
+import { sql } from "drizzle-orm";
 
 export const usersTable = sqliteTable("user", {
   id: text("id").primaryKey().$defaultFn(() => randomUUID()),
@@ -25,6 +26,7 @@ export const question = sqliteTable("question", {
   surveyId: text("survey_id").notNull().references(() => survey.id),
   question: text("question").notNull(),
   type: text("type", { enum: ["single", "multi", "text"] }).notNull().default("text"),
+  required:integer("required",{mode:"boolean"}).notNull().default(sql `TRUE`)
 });
 
 
@@ -74,5 +76,3 @@ export const vote = sqliteTable("vote", {
   pollOptionId: text("poll_option_id").notNull().references(() => pollOption.id),
   userId: text("user_id").references(() => usersTable.id),
 }, (t) => [unique().on(t.pollId, t.userId)]);
-
-

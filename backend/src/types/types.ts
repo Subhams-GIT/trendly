@@ -58,9 +58,9 @@ export interface vote{
 }
 
 export interface answer{
-    userId:string,
+    // submissionId:string,
     questionId:number,
-    response:string
+    ans:string
 }
 
 export type pollOption={

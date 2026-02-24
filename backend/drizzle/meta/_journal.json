@@ -92,6 +92,20 @@
       "when": 1771848125024,
       "tag": "0012_spooky_stark_industries",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1771949374120,
+      "tag": "0013_boring_starbolt",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1771951886082,
+      "tag": "0014_closed_firebrand",
+      "breakpoints": true
     }
   ]
 }
