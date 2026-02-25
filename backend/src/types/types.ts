@@ -24,6 +24,7 @@ export type chunk=Buffer|Uint8Array<ArrayBufferLike>
 export type userJwt={
     userId:string,
     name:string,
+    email:string
 }
 
 export interface Cookie{
@@ -58,7 +59,6 @@ export interface vote{
 }
 
 export interface answer{
-    // submissionId:string,
     questionId:number,
     ans:string
 }

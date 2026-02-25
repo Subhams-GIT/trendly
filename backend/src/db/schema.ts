@@ -16,7 +16,7 @@ export const survey = sqliteTable("survey", {
   expiry: integer("expiry", { mode: "timestamp" }),
   title: text("title"),
   description: text("description"),
-  state: text("state", { enum: ["open", "closed", "archived"] }).notNull().default("open"),
+  state: text("state", { enum: ["open", "closed"] }).notNull().default("open"),
   visibility: text("visibility", { enum: ["public", "private"] }).notNull().default("public"),
   link:text("survey_link").notNull().unique()
 });
