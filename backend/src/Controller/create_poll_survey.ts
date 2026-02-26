@@ -1,37 +1,26 @@
 import { ServerResponse } from "http";
 import type { customRequest } from "../global";
 import { dbClient } from "../db/db";
-import { survey, usersTable, questionOption, question } from "../db/schema";
+import { survey, usersTable, questionOption, question, private_users_survey } from "../db/schema";
 import { type question as qu } from "../types/types";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { randomBytes } from "crypto";
 type OptionInsert = typeof questionOption.$inferInsert;
-
+import { sendTestEmail } from "../nodemiailer/send";
 // url ->
 
 export async function create_survey_poll(req: customRequest, response: ServerResponse) {
     try {
+        const user = req.user;
+        if (!user?.id) throw new Error("invaid user ");
         const client = dbClient.getInstance();
-        const { title, description, state, visibility, Questions, expiry } = req.body;
-        console.log({ body: req.body })
-        const doesUserExist = await client.query.usersTable.findFirst({
-            where: eq(usersTable.id, req.user?.id as string)
-        })
-        if (!doesUserExist) {
-            response.writeHead(500, {
-                'content-type': 'application/json'
-            })
-            response.write(JSON.stringify({
-                message: "user not found"
-            }))
-            response.end()
-        }
-        else {
+        {
+            const { title, description, state, visibility, Questions, expiry, allowedUsers } = req.body;
             const link = randomBytes(32).toString("hex");
             const save_survey: typeof survey.$inferInsert = {
                 title,
                 description,
-                userId: doesUserExist.id,
+                userId: user.id,
                 expiry: new Date(Date.now() + expiry),
                 state,
                 visibility,
@@ -45,11 +34,27 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
                     surveyId: newSurvey?.id,
                     type: q.type,
                 }))
+                if (visibility === "private" && allowedUsers?.length) {
 
+                    const users = await tx
+                        .select({ id: usersTable.id, email: usersTable.email })
+                        .from(usersTable)
+                        .where(inArray(usersTable.email, allowedUsers));
+
+                    if (users.length === 0) {
+                        throw new Error("No valid users found");
+                    }
+
+                    const allowedEntries = users.map(user => ({
+                        surveyId: newSurvey?.id as string,
+                        userId: user.id,
+                        token: randomBytes(16).toString("hex")
+                    }));
+                    await tx.insert(private_users_survey).values(allowedEntries);
+                }
                 const inserted_Questions = await tx.insert(question).values(
                     questions).returning({ id: question.id, type: question.type, text: question.question })
 
-                //console.log(inserted_Questions);
                 const options_questions = inserted_Questions.filter(iq =>
                     iq.type !== "text"
                 );
@@ -90,15 +95,13 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
 }
 
 
-export const get_Survey = async (req: customRequest, res: ServerResponse) => {
+export const get_Survey = async (req: customRequest, res: ServerResponse) => { // function to get all surveys created by user
     try {
         const userid: string | undefined = req.user?.id;
-        console.log(req.url);
+        // console.log(req.url);
         if (!userid) throw new Error("user not found!");
         const client = dbClient.getInstance();
-        const res_survey = await client.query.survey.findMany({
-            where: eq(survey.userId, userid)
-        })
+        const res_survey = await client.select().from(survey).where(eq(usersTable.id,userid)).leftJoin()
         if (!res_survey) {
             res.writeHead(404, {
                 "content-type": "application/json"

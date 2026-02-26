@@ -57,7 +57,7 @@ export const options: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       if (account?.provider === "google" && profile?.email) {
-        return true; // actual DB call moved to jwt
+        return true; 
       }
       return false;
     },

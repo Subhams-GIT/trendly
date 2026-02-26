@@ -4,7 +4,6 @@ import { dbClient } from "../db/db";
 import { eq } from "drizzle-orm";
 import { survey, surveySubmission,answer } from "../db/schema";
 import type { answer as a} from "../types/types";
-// /token
 export const ans_survey = async (req: customRequest, res: ServerResponse) => {
     try {
         const user = req.user;

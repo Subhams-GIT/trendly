@@ -9,6 +9,8 @@ import {
   poll,
   pollOption,
   vote,
+  private_users_survey,
+  private_users_poll,
 } from "./schema";
 
 // ─── USER ──────────────────────────────────────────────────────────────────
@@ -103,3 +105,18 @@ export const voteRelations = relations(vote, ({ one }) => ({
     references: [usersTable.id],
   }),
 }));
+
+
+export const privateSurveyRelations=relations(private_users_survey,({one})=>({
+    survey:one(survey,{
+        fields:[private_users_survey.surveyId],
+        references:[survey.id]
+    })
+}))
+
+export const privatePollRelations=relations(private_users_poll,({one})=>({
+    poll:one(poll,{
+        fields:[private_users_poll.pollId],
+        references:[poll.id]
+    })
+}))

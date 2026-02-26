@@ -5,7 +5,7 @@ import { sign_in } from "../Controller/sign_in";
 import { parseCookies } from "../utils/cookie";
 import authenticate from "../middleware/auth_middleware";
 import { bodyParser } from "../middleware/bodyParser";
-import { create_poll } from "../Controller/create_poll";
+import { create_poll, get_polls } from "../Controller/create_poll";
 import u from "url";
 import { ans_survey } from "../Controller/ans_survey";
 // har ek url me diff type of data recceive ho sakta hai to i need to have a function which takes the request object and process the body based on the url and method.
@@ -24,7 +24,7 @@ export default async function Router(req: customRequest, res: http.ServerRespons
         }
         await bodyParser(req, res);
         switch (url?.pathname) {
-            case '/create':
+            case '/create-survey':
                 create_survey_poll(req, res);
                 break;
             case '/sign-in':
@@ -36,11 +36,19 @@ export default async function Router(req: customRequest, res: http.ServerRespons
             case '/surveys':
                 get_Survey(req, res);
                 break;
+            case '/polls':
+                get_polls(req,res);
+                break;
             case '/submit_survey':
                 ans_survey(req,res);
                 break;
             default:
-                res.write("404 not found")
+                res.writeHead(404, {
+                    "content-type": "application/json"
+                })
+                res.write(JSON.stringify({
+                    message: "404 not found"
+                }))
                 res.end();
         }
     } catch (error) {

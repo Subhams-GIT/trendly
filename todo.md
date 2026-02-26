@@ -7,3 +7,6 @@
 
 polls -> private , public
 survey -> private , public
+
+
+votes -> anonymous , authenticated 
