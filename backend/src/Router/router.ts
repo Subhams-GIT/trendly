@@ -8,7 +8,7 @@ import { bodyParser } from "../middleware/bodyParser";
 import { create_poll } from "../Controller/create_poll";
 import u from "url";
 import { ans_survey } from "../Controller/ans_survey";
-import { get_polls } from "../Controller/get_all_polls";
+import { get_all_polls} from "../Controller/get_all_polls";
 import { getPoll } from "../Controller/get_poll";
 import { get_specific_Survey } from "../Controller/get_survey";
 // har ek url me diff type of data recceive ho sakta hai to i need to have a function which takes the request object and process the body based on the url and method.
@@ -26,36 +26,37 @@ export default async function Router(req: customRequest, res: http.ServerRespons
         }
         await bodyParser(req, res);
         switch (true) {
-            case url?.pathname === '/create-survey':
+            case url?.pathname === '/create-survey': // create a survey route
                 create_survey(req, res);
                 break;
 
-            case url?.pathname === '/sign-in':
+            case url?.pathname === '/sign-in': // signin route
                 sign_in(req, res);
                 break;
 
-            case url?.pathname === '/create-poll':
+            case url?.pathname === '/create-poll': // create a poll route
                 create_poll(req, res);
                 break;
-            case url.pathname==='/surveys':
+            
+            case url.pathname==='/surveys': // get all survey route
                 get_Survey(req,res);
                 break;
 
-            case url?.pathname?.startsWith('/survey'):
+            case url?.pathname?.startsWith('/survey'): // get a specific survey route
                 const surveytoken=url.query?.split('=')[1];
                 req.params={token:surveytoken as string}
                 get_specific_Survey(req, res);
                 break;
 
-            case url?.pathname === '/polls':
-                get_polls(req, res);
+            case url?.pathname === '/polls': // get all polls route
+                get_all_polls(req, res);
                 break;
 
-            case url?.pathname === '/submit_survey':
+            case url?.pathname === '/submit_survey': // submit a survey route
                 ans_survey(req, res);
                 break;
 
-            case url?.pathname?.startsWith('/poll/'):
+            case url?.pathname?.startsWith('/poll/'): // get a specific poll route
                 const pollId = url.pathname?.split('/')[2];
                 req.params = { id: pollId as string };
                 getPoll(req, res);

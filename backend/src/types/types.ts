@@ -6,7 +6,6 @@ export enum visibility{
 }
 export enum state{
     open,
-    closed,
     archieved
 }
 export enum voteMode{
@@ -44,12 +43,14 @@ export interface question{
 
 
 export interface poll{
+    id:string,
     statement:string,
-    user_id:string,
-    expiry:number,
-    state:state,
-    visibility:visibility,
-    voteMode:voteMode,
+    userId:string,
+    expiry:Date,
+    state:"open"|"closed"|"archived",
+    visibility:"public"|"private",
+    link:string|null,
+    createdAt:Date|null
 }
 
 export interface vote{
@@ -64,6 +65,29 @@ export interface answer{
 }
 
 export type pollOption={
+    id:string,
     data:string,
     pollId:string,
+    voteCount:number
 }
+export type resultant_polls={
+    poll:poll,
+    poll_option:pollOption|null
+}
+export type FlatPoll = {
+  pollId: string;
+  statement: string;
+  pollOptionId: string | null;
+  optionData: string | null;
+  voteCount: number | null;
+};
+
+export type NestedPoll = {
+  id: string;
+  statement: string;
+  options: {
+    id: string;
+    data: string;
+    voteCount: number | null;
+  }[];
+};
