@@ -23,3 +23,4 @@ if the poll or survey is private then i need to have a users list for sending th
 each email will be having a row in the private users list with a separate token associated with them . on the backend that token will be checked if present then only load the poll for them else dont load
 
 url -> http://localhost:3000/t?=msndy3747&i=3488 for private users of a survey or a poll
+private users ke liye we just need the survey id and check if the user is signed in or not 

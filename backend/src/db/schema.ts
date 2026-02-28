@@ -83,12 +83,12 @@ export const vote = sqliteTable("vote", {
 
 
 export const private_users_poll = sqliteTable(
-  "private_users_poll",{
-    id: text("id").primaryKey().$defaultFn(() => randomUUID()),
-    pollId: text("poll_id").notNull().references(() => poll.id),
-    userId: text("user_id").notNull().references(() => usersTable.id),
-    token: text("token"),
-  },(t) => [unique().on(t.pollId, t.userId)]);
+  "private_users_poll", {
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  pollId: text("poll_id").notNull().references(() => poll.id),
+  userId: text("user_id").notNull().references(() => usersTable.id),
+  token: text("token"),
+}, (t) => [unique().on(t.pollId, t.userId)]);
 
 
 export const private_users_survey = sqliteTable(

@@ -1,6 +1,8 @@
-
+import dotenv from "dotenv"
 import { decode, type JWT } from 'next-auth/jwt';
 import type { customRequest, JWTPayload } from '../global';
+
+dotenv.config();
 export default async function authenticate(req:customRequest, cookie: any): Promise<JWTPayload|null> {
     try {
         const session_token = cookie["next-auth.session-token"]

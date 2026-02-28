@@ -7,9 +7,8 @@ import { eq, inArray } from "drizzle-orm";
 import { randomBytes } from "crypto";
 type OptionInsert = typeof questionOption.$inferInsert;
 import { sendTestEmail } from "../nodemiailer/send";
-// url ->
 
-export async function create_survey_poll(req: customRequest, response: ServerResponse) {
+export async function create_survey(req: customRequest, response: ServerResponse) {
     try {
         const user = req.user;
         if (!user?.id) throw new Error("invaid user ");
@@ -34,7 +33,8 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
                     surveyId: newSurvey?.id,
                     type: q.type,
                 }))
-                if (visibility === "private" && allowedUsers?.length) {
+                if(visibility==="private" && allowedUsers.length===0) throw new Error("upload users list for privacy!");
+                if (visibility === "private" && allowedUsers?.length>0) {
 
                     const users = await tx
                         .select({ id: usersTable.id, email: usersTable.email })
@@ -48,7 +48,7 @@ export async function create_survey_poll(req: customRequest, response: ServerRes
                     const allowedEntries = users.map(user => ({
                         surveyId: newSurvey?.id as string,
                         userId: user.id,
-                        token: randomBytes(16).toString("hex")
+                        // token: randomBytes(16).toString("hex")
                     }));
                     await tx.insert(private_users_survey).values(allowedEntries);
                 }
@@ -101,8 +101,12 @@ export const get_Survey = async (req: customRequest, res: ServerResponse) => { /
         // console.log(req.url);
         if (!userid) throw new Error("user not found!");
         const client = dbClient.getInstance();
-        const res_survey = await client.select().from(survey).where(eq(usersTable.id,userid)).leftJoin()
-        if (!res_survey) {
+        const surveys = await client
+            .select()
+            .from(survey).where(eq(survey.userId, userid))
+            .leftJoin(question, eq(question.surveyId, survey.id))
+            .fullJoin(questionOption, eq(questionOption.questionId, question.id));
+        if (!surveys || surveys.length === 0) {
             res.writeHead(404, {
                 "content-type": "application/json"
             });
@@ -113,7 +117,7 @@ export const get_Survey = async (req: customRequest, res: ServerResponse) => { /
             "content-type": "application/json"
         })
         res.write(JSON.stringify({
-            survey: res_survey
+            survey: surveys
         }))
         res.end();
     } catch (error) {

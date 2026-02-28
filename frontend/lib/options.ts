@@ -57,7 +57,7 @@ export const options: NextAuthOptions = {
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       if (account?.provider === "google" && profile?.email) {
-        return true; 
+        return true;
       }
       return false;
     },
@@ -91,7 +91,6 @@ export const options: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60 * 24 * 30,
   },
   jwt: {
     secret: process.env.NEXTAUTH_SECRET!,

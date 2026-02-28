@@ -1,7 +1,7 @@
 import type { ServerResponse } from "node:http";
 import type { customRequest } from "../global";
 import { dbClient } from "../db/db";
-import { poll, pollOption, private_users_poll, usersTable } from "../db/schema";
+import { poll, pollOption, private_users_poll, question, usersTable } from "../db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { pollOption as po, visibility as v } from "../types/types";
 import { randomBytes } from "node:crypto";
@@ -12,7 +12,9 @@ export async function create_poll(req: customRequest, response: ServerResponse) 
         const client = dbClient.getInstance();
         const { statement, expiry, state, visibility, options, allowedUsers } = req.body;
 
-        if (Array.from(req.body).map(e => e != null).includes(false)) throw new Error("cannot create");
+        if (Object.values(req.body).some(v => v == null)) {
+            throw new Error("cannot create");
+        }
         {
             client.transaction(async tx => {
 
@@ -24,7 +26,8 @@ export async function create_poll(req: customRequest, response: ServerResponse) 
                     userId: user.id
                 }
                 const polls = await tx.insert(poll).values(saved_poll).returning({ id: poll.id });
-                if(visibility == "private" && allowedUsers.length > 0){
+                if(visibility==="private" && allowedUsers.length==0) throw new Error("enter users list for private poll")
+                if (visibility == "private" && allowedUsers.length > 0) {
                     const users = await tx
                         .select({ id: usersTable.id, email: usersTable.email })
                         .from(usersTable)
@@ -63,44 +66,5 @@ export async function create_poll(req: customRequest, response: ServerResponse) 
             message: error as string
         })
         response.end();
-    }
-}
-
-export async function get_polls(req: customRequest, res: ServerResponse) { // function to get all polls creted by user
-    try {
-        const user = req.user;
-        if (!user?.id) throw new Error("user id not found!");
-        const client = dbClient.getInstance();
-        const doesUserExist = await client.query.usersTable.findFirst({
-            where: eq(usersTable.id, req.user?.id as string)
-        })
-        if (!doesUserExist) {
-            res.writeHead(500, {
-                'content-type': 'application/json'
-            })
-            res.write(JSON.stringify({
-                message: "user not found"
-            }))
-            res.end()
-        }
-        const polls = await client.query.poll.findMany({
-            where: eq(poll.userId, user.id)
-        })
-        res.writeHead(200, {
-            "content-type": "application/json"
-        })
-        res.write(JSON.stringify({
-            polls
-        }))
-        res.end();
-    } catch (e) {
-        console.error("polls not found", e);
-        res.writeHead(500, {
-            "content-type": "application/json"
-        })
-        res.write(JSON.stringify({
-            message: "polls not found"
-        }))
-        res.end();
     }
 }

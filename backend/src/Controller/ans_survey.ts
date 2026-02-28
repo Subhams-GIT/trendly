@@ -7,7 +7,6 @@ import type { answer as a} from "../types/types";
 export const ans_survey = async (req: customRequest, res: ServerResponse) => {
     try {
         const user = req.user;
-        if (!user?.id) return;
         const survey_token = req.queryparams.get("t")
         if (!survey_token) return;
         const { ans } = req.body;
@@ -15,7 +14,9 @@ export const ans_survey = async (req: customRequest, res: ServerResponse) => {
         const survey_found = await client.query.survey.findFirst({
             where: eq(survey.link, survey_token)
         })
-
+        if(survey_found?.visibility!= "public"){
+            if (!user?.id) return;
+        }
         if (!survey_found || survey_found.state != "open") {
             res.writeHead(500);
             res.write(JSON.stringify({
