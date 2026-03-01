@@ -7,6 +7,7 @@ import { type FlatPoll,type NestedPoll } from "../types/types";
 
 export async function get_all_polls(req: customRequest, res: ServerResponse) { // function to get all polls creted by user
     try {
+        
         const user = req.user;
         if (!user?.id) throw new Error("user id not found!");
         console.log("fetching polls for user:", user.id);

@@ -1409,6 +1409,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ioredis/commands@npm:1.5.1":
+  version: 1.5.1
+  resolution: "@ioredis/commands@npm:1.5.1"
+  checksum: 10c0/cb8f6d13cff0753e3e7ef001fb895491985d9a623248192538f13bc2fd9bfdfde3c18cf2ba6f20ec8ceaa681b0771070d3a09b82eed044c798bcfef5e3ae54b3
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^9.0.0":
   version: 9.0.0
   resolution: "@isaacs/cliui@npm:9.0.0"
@@ -3410,7 +3417,9 @@ __metadata:
     radix-ui: "npm:^1.4.3"
     react: "npm:19.2.3"
     react-dom: "npm:19.2.3"
+    separator: "npm:^0.1.0"
     shadcn: "npm:^3.8.5"
+    sheet: "npm:^0.2.0"
     tailwind-merge: "npm:^3.5.0"
     tailwindcss: "npm:^4"
     tw-animate-css: "npm:^1.4.0"
@@ -4413,7 +4422,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cluster-key-slot@npm:1.1.2":
+"cluster-key-slot@npm:1.1.2, cluster-key-slot@npm:^1.1.0":
   version: 1.1.2
   resolution: "cluster-key-slot@npm:1.1.2"
   checksum: 10c0/d7d39ca28a8786e9e801eeb8c770e3c3236a566625d7299a47bb71113fb2298ce1039596acb82590e598c52dbc9b1f088c8f587803e697cb58e1867a95ff94d3
@@ -4722,6 +4731,13 @@ __metadata:
   version: 1.0.0
   resolution: "delayed-stream@npm:1.0.0"
   checksum: 10c0/d758899da03392e6712f042bec80aa293bbe9e9ff1b2634baae6a360113e708b91326594c8a486d475c69d6259afb7efacdc3537bfcda1c6c648e390ce601b19
+  languageName: node
+  linkType: hard
+
+"denque@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "denque@npm:2.1.0"
+  checksum: 10c0/f9ef81aa0af9c6c614a727cb3bd13c5d7db2af1abf9e6352045b86e85873e629690f6222f4edd49d10e4ccf8f078bbeec0794fafaf61b659c0589d0c511ec363
   languageName: node
   linkType: hard
 
@@ -6533,6 +6549,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ioredis@npm:^5.10.0":
+  version: 5.10.0
+  resolution: "ioredis@npm:5.10.0"
+  dependencies:
+    "@ioredis/commands": "npm:1.5.1"
+    cluster-key-slot: "npm:^1.1.0"
+    debug: "npm:^4.3.4"
+    denque: "npm:^2.1.0"
+    lodash.defaults: "npm:^4.2.0"
+    lodash.isarguments: "npm:^3.1.0"
+    redis-errors: "npm:^1.2.0"
+    redis-parser: "npm:^3.0.0"
+    standard-as-callback: "npm:^2.1.0"
+  checksum: 10c0/294e8cdef963f922b04ad023d4165f1d399b27279b9890f3e1311da57fb2a082c8dca52d18bd14a54acd6fb82853783641a0c47ff18661a8756221049f807e88
+  languageName: node
+  linkType: hard
+
 "ip-address@npm:10.0.1":
   version: 10.0.1
   resolution: "ip-address@npm:10.0.1"
@@ -7374,10 +7407,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lodash.defaults@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "lodash.defaults@npm:4.2.0"
+  checksum: 10c0/d5b77aeb702caa69b17be1358faece33a84497bcca814897383c58b28a2f8dfc381b1d9edbec239f8b425126a3bbe4916223da2a576bb0411c2cefd67df80707
+  languageName: node
+  linkType: hard
+
 "lodash.includes@npm:^4.3.0":
   version: 4.3.0
   resolution: "lodash.includes@npm:4.3.0"
   checksum: 10c0/7ca498b9b75bf602d04e48c0adb842dfc7d90f77bcb2a91a2b2be34a723ad24bc1c8b3683ec6b2552a90f216c723cdea530ddb11a3320e08fa38265703978f4b
+  languageName: node
+  linkType: hard
+
+"lodash.isarguments@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "lodash.isarguments@npm:3.1.0"
+  checksum: 10c0/5e8f95ba10975900a3920fb039a3f89a5a79359a1b5565e4e5b4310ed6ebe64011e31d402e34f577eca983a1fc01ff86c926e3cbe602e1ddfc858fdd353e62d8
   languageName: node
   linkType: hard
 
@@ -7720,6 +7767,13 @@ __metadata:
   dependencies:
     minipass: "npm:^7.1.2"
   checksum: 10c0/5aad75ab0090b8266069c9aabe582c021ae53eb33c6c691054a13a45db3b4f91a7fb1bd79151e6b4e9e9a86727b522527c0a06ec7d45206b745d54cd3097bcec
+  languageName: node
+  linkType: hard
+
+"moment@npm:^2.30.1":
+  version: 2.30.1
+  resolution: "moment@npm:2.30.1"
+  checksum: 10c0/865e4279418c6de666fca7786607705fd0189d8a7b7624e2e56be99290ac846f90878a6f602e34b4e0455c549b85385b1baf9966845962b313699e7cb847543a
   languageName: node
   linkType: hard
 
@@ -8740,6 +8794,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"redis-errors@npm:^1.0.0, redis-errors@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "redis-errors@npm:1.2.0"
+  checksum: 10c0/5b316736e9f532d91a35bff631335137a4f974927bb2fb42bf8c2f18879173a211787db8ac4c3fde8f75ed6233eb0888e55d52510b5620e30d69d7d719c8b8a7
+  languageName: node
+  linkType: hard
+
+"redis-parser@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "redis-parser@npm:3.0.0"
+  dependencies:
+    redis-errors: "npm:^1.0.0"
+  checksum: 10c0/ee16ac4c7b2a60b1f42a2cdaee22b005bd4453eb2d0588b8a4939718997ae269da717434da5d570fe0b05030466eeb3f902a58cf2e8e1ca058bf6c9c596f632f
+  languageName: node
+  linkType: hard
+
 "redis@npm:^5.11.0":
   version: 5.11.0
   resolution: "redis@npm:5.11.0"
@@ -9021,6 +9091,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"separator@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "separator@npm:0.1.0"
+  checksum: 10c0/50d6bb6578f9e05f3fc5265d8073329d5f0c4645b8921ec4e484f0237e70afa84865bf1189036e2052c8bc0684795dfd6b0bc16d1a4fad50982ad825ffbec419
+  languageName: node
+  linkType: hard
+
 "serve-static@npm:^2.2.0":
   version: 2.2.1
   resolution: "serve-static@npm:2.2.1"
@@ -9222,6 +9299,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sheet@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "sheet@npm:0.2.0"
+  checksum: 10c0/6b943ec07f3b59f6cc17ac62031a330dddd05e0f1698e82d09f6b2a441edd32ba1255839f8bda17f778bab74d080e2dfaa1952393a8fe8784beaf83588a37555
+  languageName: node
+  linkType: hard
+
 "side-channel-list@npm:^1.0.0":
   version: 1.0.0
   resolution: "side-channel-list@npm:1.0.0"
@@ -9356,6 +9440,13 @@ __metadata:
   version: 0.0.5
   resolution: "stable-hash@npm:0.0.5"
   checksum: 10c0/ca670cb6d172f1c834950e4ec661e2055885df32fee3ebf3647c5df94993b7c2666a5dbc1c9a62ee11fc5c24928579ec5e81bb5ad31971d355d5a341aab493b3
+  languageName: node
+  linkType: hard
+
+"standard-as-callback@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "standard-as-callback@npm:2.1.0"
+  checksum: 10c0/012677236e3d3fdc5689d29e64ea8a599331c4babe86956bf92fc5e127d53f85411c5536ee0079c52c43beb0026b5ce7aa1d834dd35dd026e82a15d1bcaead1f
   languageName: node
   linkType: hard
 
@@ -9710,7 +9801,9 @@ __metadata:
     "@types/jsonwebtoken": "npm:^9.0.10"
     "@types/nodemailer": "npm:^7.0.11"
     drizzle-dbml-generator: "npm:^0.10.0"
+    ioredis: "npm:^5.10.0"
     jose: "npm:^6.1.3"
+    moment: "npm:^2.30.1"
     next-auth: "npm:^4.24.13"
     nodemailer: "npm:^8.0.1"
     querystring: "npm:^0.2.1"

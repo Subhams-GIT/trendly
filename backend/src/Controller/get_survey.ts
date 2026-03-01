@@ -2,20 +2,22 @@ import type { ServerResponse } from "node:http";
 import type { customRequest } from "../global";
 import { dbClient } from "../db/db";
 import { private_users_survey, question, questionOption, survey, usersTable } from "../db/schema";
-import { ConsoleLogWriter, eq } from "drizzle-orm";
-
+import { eq } from "drizzle-orm";
+import u from 'url'
 export const get_specific_Survey = async (req: customRequest, res: ServerResponse) => { // function to get all surveys
     try {
         // fetch the survey first
         // check for visibility
         // if public normally return it
-        // else if private then check whether user is allowed to see it or not
-
-        const survey_token = req.params?.token;
+        // else if private  then check whether user is allowed to see it or not
+        const url=u.parse(req.url as string)
+        const survey_token = url.query?.split('=')[1];
+        // req.queryparams?.set("token", surveytoken as string)
+        // const survey_token = req.queryparamsparams?.token;
         if (!survey_token) throw new Error("invalid url");
         const user = req.user;
-        if(!user) throw new Error("invalid user")
-        const client=dbClient.getInstance();
+        if (!user) throw new Error("invalid user")
+        const client = dbClient.getInstance();
         const foundSurvey = await client
             .select()
             .from(survey)
@@ -28,14 +30,14 @@ export const get_specific_Survey = async (req: customRequest, res: ServerRespons
         }
 
         const surveyData = foundSurvey[0];
-        if(surveyData?.state==="closed") throw new Error("survey is no more valid");
-        if(surveyData?.visibility!="public"){
-            const private_list=await client.query.private_users_survey.findFirst({
-                where:eq(private_users_survey.userId,user?.id as string)
+        if (surveyData?.state === "closed") throw new Error("survey is no more valid");
+        if (surveyData?.visibility != "public") {
+            const private_list = await client.query.private_users_survey.findFirst({
+                where: eq(private_users_survey.userId, user?.id as string)
             })
             console.log(private_list);
             console.log(user)
-            if(private_list?.userId!=user.id) throw new Error("user not allowed!")
+            if (private_list?.userId != user.id) throw new Error("user not allowed!")
         }
         const surveys = await client
             .select({

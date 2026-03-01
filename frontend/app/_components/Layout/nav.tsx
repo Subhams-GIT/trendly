@@ -13,8 +13,8 @@ export default function Navigation() {
   return (
     <nav className="sticky top-0 z-50 shadow-sm pt-1 ring-1 ring-black/10 font-serif">
       {
-        session.data?.user?(<div>
-          <Button className='px-2 py-1 rounded-sm bg-white text-blue-400'>Create</Button>
+        session.data?.user?(<div className='flex justify-end'>
+          <Button className='px-2 py-1 rounded-sm bg-white  shadow-sm ring-1 ring-black/10 mx-4 my-3'>Create</Button>
         </div>):(<div className='flex justify-end'>
           <Button className="my-2 text-center mr-3 underline text-xl ">Join Now</Button>
         </div>)

@@ -14,9 +14,9 @@ export const getPoll = async (req: customRequest, res: ServerResponse) => {
             res.end(JSON.stringify({ error: "Poll ID is required" }));
             return;
         }
-        const client=dbClient.getInstance();
-        // TODO: Replace with your database query
-        const res_poll = await client.select().from(poll).where(eq(poll.id,id)).leftJoin(pollOption,eq(pollOption.pollId,poll.id))
+        const client = dbClient.getInstance();
+
+        const res_poll = await client.select().from(poll).where(eq(poll.id, id)).leftJoin(pollOption, eq(pollOption.pollId, poll.id))
 
         if (!res_poll) {
             res.writeHead(404, { "Content-Type": "application/json" });
