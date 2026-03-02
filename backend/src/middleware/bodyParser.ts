@@ -10,7 +10,7 @@ export function bodyParser(req: customRequest, res: ServerResponse, next: next):
         let rawBody: any = [];
         if (contentType === undefined) {
             resolve({});
-            next();
+            next(req,res);
         }
         req.on("data", (chunk) => {
             rawBody.push(chunk);
@@ -30,7 +30,7 @@ export function bodyParser(req: customRequest, res: ServerResponse, next: next):
                 }
                 console.log(parsedBody)
                 resolve(parsedBody);
-                next();
+                next(req,res);
             } catch (err) {
                 reject(err);
                 return;

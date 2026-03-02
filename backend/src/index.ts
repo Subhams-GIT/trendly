@@ -17,16 +17,15 @@ const server = http.createServer((req, res) => {
   router.handle(req as customRequest, res);
 });
 
-router.useMiddleware(bodyParser)
-router.useMiddleware(authenticate);
-router.use("/health", healthCheckController);
-router.use("/surveys",get_Survey);
-router.use('/survey/:s',get_specific_Survey)
-router.use("/polls",get_all_polls)
-router.use("/crete-survey",create_survey);
-router.use('/sign-in',sign_in);
-router.use('/submit-survey',ans_survey);
-router.use('/poll',getPoll);
+router.useGlobal(bodyParser)
+router.post ('/sign-in',sign_in);
+router.use("GET","/health",healthCheckController,authenticate)
+router.use("GET", "/surveys", get_Survey, authenticate);
+router.use("GET", "/survey", get_specific_Survey, authenticate);
+router.use("GET", "/polls", get_all_polls, authenticate);
+router.use("POST", "/create-survey", create_survey, authenticate);
+router.use("POST", "/submit-survey", ans_survey, authenticate);
+router.use("GET", "/poll", getPoll, authenticate);
 
 server.listen(3002, "localhost", () => {
   console.log("server running at localhost:3002");

@@ -47,10 +47,11 @@ export const get_specific_Survey = async (req: customRequest, res: ServerRespons
                 expiry: survey.expiry,
                 state: survey.state,
                 visibility: survey.visibility,
-                questionId: question.question,
+                questionId: question.id,
                 questionText: question.question,
                 optionId: questionOption.id,
-                optionText: questionOption.data
+                optionText: questionOption.data,
+                type:question.type
             })
             .from(survey)
             .leftJoin(question, eq(question.surveyId, survey.id))

@@ -6,7 +6,7 @@ declare module "http" {
 
   interface CustomRequest extends IncomingMessage {
     params?: Record<string, string>;
-    queryparams?: Map<string, string>;
+    queryparams?: Record<string, string>;
     body?: any;
     customProperty?: string;
   }

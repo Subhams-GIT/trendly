@@ -1,58 +1,83 @@
 import type { ServerResponse } from "node:http";
 import type { customRequest } from "../global";
-// import u from "url";
-
-export type next = () => void;
-
-type Controller = (req: customRequest, res: ServerResponse) => void;
-type middleware = (req: customRequest, res: ServerResponse, next: next) => void;
-
+import { parseUrl } from "../utils/parse_url";
+/*
+const router=express.router();
+router.use(authmiddleware)
+router.get("/api/v1/health",healthcheckcontroller)
+router.post()
+*/
+export type next = (req: customRequest, res: ServerResponse) => void;
+export type Controller = (req: customRequest, res: ServerResponse) => void;
+export type middleware = (req: customRequest, res: ServerResponse, next: next) => void;
+export type METHODS = "GET" | "POST" | "PUT"
+interface RouteHandler {
+    controller: Controller;
+    middlewares: middleware[];
+}
 export class Router {
-    public router: Map<string, Controller> = new Map();
-    public middleware: middleware[] = [];
+    public routes: Map<string, Map<METHODS, RouteHandler>> = new Map();
+    public globalMiddlewares: middleware[] = [];
 
-    // register controller
-    use(route: string, controller: Controller) {
-        this.router.set(route, controller);
+    useGlobal(mw: middleware) {
+        this.globalMiddlewares.push(mw);
     }
+    use(method: METHODS, route: string, controller: Controller, ...middlewares: middleware[]) {
+        if (!this.routes.has(route)) {
+            this.routes.set(route, new Map());
+        }
 
-    // register middleware
-    useMiddleware(middlewarefunction: middleware) {
-        this.middleware.push(middlewarefunction);
+        this.routes.get(route)!.set(method, {
+            controller,
+            middlewares
+        });
     }
 
     handle(req: customRequest, res: ServerResponse) {
-        const Url = new URL(req.url ?? "", "http://localhost:3002");
-        const path = Url.pathname;
+        const { pathname, query, params } = parseUrl(req.url as string, "http://localhost:3002");
+        req.queryparams = new Map(Object.entries(query));
+        req.searchparams = params;
+        const method = req.method as METHODS;
 
-        const controller = this.router.get(path);
-
-        if (!controller) {
-            res.statusCode = 400;
-            res.end("controller not found");
-            return;
+        const routeMap = this.routes.get(pathname);
+        if (!routeMap) {
+            res.statusCode = 404;
+            return res.end("Not Found");
         }
 
-        const queryparams = Url.searchParams;
-        const pa = new Map<string, string>();
-        queryparams.forEach((value, key) => {
-            pa.set(key, value);
-        });
-        req.queryparams = pa;
+        const handler = routeMap.get(method);
+        if (!handler) {
+            res.statusCode = 405;
+            return res.end("Method Not Allowed");
+        }
+
+        const stack = [
+            ...this.globalMiddlewares,
+            ...handler.middlewares,
+            handler.controller
+        ]
+
         let index = 0;
 
-        const next: next = () => {
-            if (index < this.middleware.length ) {
-                const fn = this.middleware[index++];
-                console.log(fn)
-                if(fn )
-                fn(req, res, next);
-            } else {
-                console.log(controller)
-                controller(req, res);
+        const next = () => {
+            const fn = stack[index++];
+            if (!fn) return;
+
+            if (index === stack.length) {
+                return (fn as Controller)(req, res);
             }
+
+            (fn as middleware)(req, res, next);
         };
 
-        next(); // start the chain
+        next();
     }
+    get(route: string, controller: Controller, ...middleware: middleware[]) {
+        this.use("GET", route, controller, ...middleware);
+    }
+
+    post(route: string, controller: Controller,...middleware:middleware[]) {
+         this.use("POST", route, controller, ...middleware);
+    }
+
 }

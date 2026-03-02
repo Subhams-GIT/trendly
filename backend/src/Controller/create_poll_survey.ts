@@ -11,23 +11,27 @@ import { sendTestEmail } from "../nodemiailer/send";
 export async function create_survey(req: customRequest, response: ServerResponse) {
     try {
         const user = req.user;
+        console.log({user})
         if (!user?.id) throw new Error("invaid user ");
+
         const client = dbClient.getInstance();
-        {
             const { title, description, state, visibility, Questions, expiry, allowedUsers } = req.body;
             const link = randomBytes(32).toString("hex");
             const save_survey: typeof survey.$inferInsert = {
                 title,
                 description,
                 userId: user.id,
-                expiry: new Date(Date.now() + expiry),
+                expiry: new Date(Date.now() + expiry * 24 * 60 * 60 * 1000),
                 state,
                 visibility,
                 link
             };
-
-            await client.transaction(async tx => {
-                const [newSurvey] = await tx.insert(survey).values(save_survey).returning({ id: survey.id });
+            const doesuser=await client.query.usersTable.findFirst({
+                where:eq(usersTable.id,user.id)
+            })
+            console.log(doesuser)
+           const token= await client.transaction(async tx => {
+                const [newSurvey] = await tx.insert(survey).values(save_survey).returning({ id: survey.id,token:survey.link });
                 const questions: typeof question.$inferInsert = Questions.map((q: qu) => ({
                     question: q.statement,
                     surveyId: newSurvey?.id,
@@ -74,14 +78,14 @@ export async function create_survey(req: customRequest, response: ServerResponse
                     }
                 });
                 await tx.insert(questionOption).values(options);
+                return newSurvey?.token
             })
-
-        }
         response.writeHead(200, {
             'content-type': 'application/json'
         })
         response.write(JSON.stringify({
-            message: "survey created"
+            message: "survey created",
+            link:token
         }))
         response.end()
     } catch (error) {

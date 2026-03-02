@@ -16,6 +16,7 @@ export async function sign_in(req: customRequest, res: ServerResponse) {
         const doesUSerExist = await client.query.usersTable.findFirst({
             where: eq(usersTable.email, email)
         })
+        console.log({doesUSerExist})
         if (doesUSerExist) {
             res.writeHead(200, {
                 "content-type": "application/json"
@@ -26,7 +27,9 @@ export async function sign_in(req: customRequest, res: ServerResponse) {
                 name: doesUSerExist.name,
             }));
             res.end();
+            return ;
         }
+        console.log(doesUSerExist)
         const user: typeof usersTable.$inferInsert = {
             id: randomUUID(),
             name,

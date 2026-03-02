@@ -20,7 +20,7 @@ export async function create_poll(req: customRequest, response: ServerResponse) 
 
                 const saved_poll: typeof poll.$inferInsert = {
                     statement,
-                    expiry: new Date(Date.now() + expiry),
+                    expiry: new Date(Date.now() + expiry * 24 * 60 * 60 * 1000),
                     state,
                     visibility,
                     userId: user.id

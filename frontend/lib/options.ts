@@ -76,6 +76,7 @@ export const options: NextAuthOptions = {
             name: token?.name,
             email: token?.email,
           });
+          console.log({newuser})
           token.id = newuser.data.id;
           token.name = newuser.data.name;
           token.email = newuser.data.email;
