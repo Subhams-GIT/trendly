@@ -10,6 +10,8 @@ import { get_specific_Survey } from "./Controller/get_survey";
 import { sign_in } from "./Controller/sign_in";
 import { ans_survey } from "./Controller/ans_survey";
 import { getPoll } from "./Controller/get_poll";
+import { create_poll } from "./Controller/create_poll";
+import { vote_poll } from "./Controller/vote";
 
 const router = new Router();
 
@@ -26,7 +28,8 @@ router.use("GET", "/polls", get_all_polls, authenticate);
 router.use("POST", "/create-survey", create_survey, authenticate);
 router.use("POST", "/submit-survey", ans_survey, authenticate);
 router.use("GET", "/poll", getPoll, authenticate);
-
+router.use("POST","/create-poll",create_poll,authenticate)
+router.use("POST",'/vote-poll',vote_poll,authenticate)
 server.listen(3002, "localhost", () => {
   console.log("server running at localhost:3002");
 });

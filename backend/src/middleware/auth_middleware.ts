@@ -21,6 +21,8 @@ export default async function authenticate(req:customRequest,res:ServerResponse,
         return payload;
     } catch (error) {
         console.error("Auth error:", error);
+        res.writeHead(200);
+        res.end("not authentic")
         return null;
     }
 }

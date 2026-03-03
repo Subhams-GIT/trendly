@@ -1,7 +1,8 @@
+import { Sidebar } from "../Layout/Sidebar"
 
 const Dashboard = () => {
   return (
-    <div>
+    <div className="max-w-2xl h-full">
       
     </div>
   )

@@ -23,7 +23,8 @@ export async function create_poll(req: customRequest, response: ServerResponse) 
                     expiry: new Date(Date.now() + expiry * 24 * 60 * 60 * 1000),
                     state,
                     visibility,
-                    userId: user.id
+                    userId: user.id,
+                    link:randomBytes(32).toString("hex")
                 }
                 const polls = await tx.insert(poll).values(saved_poll).returning({ id: poll.id });
                 if(visibility==="private" && allowedUsers.length==0) throw new Error("enter users list for private poll")

@@ -28,7 +28,7 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex h-screen w-64 flex-col border-r bg-background p-4">
+      <aside className="hidden md:flex h-screen w-64 flex-col border-r bg-white p-4">
         <h2 className="mb-6 text-lg font-semibold">My App</h2>
         <nav className="space-y-2">
           {navItems.map((item) => {
@@ -53,8 +53,8 @@ export function Sidebar() {
       </aside>
 
       {/* Mobile Sidebar */}
-      <div className="md:hidden p-4">
-        <Sheet>
+      <div className="md:hidden p-4 bg-white">
+        <Sheet >
           <SheetTrigger asChild>
             <Button variant="outline" size="icon">
               <Menu className="h-5 w-5" />
@@ -68,7 +68,7 @@ export function Sidebar() {
                 return (
                   <Link key={item.href} href={item.href}>
                     <Button
-                      variant={pathname === item.href ? "secondary" : "ghost"}
+                      variant={pathname === item.href ? "secondary" : "default"}
                       className="w-full justify-start gap-2"
                     >
                       <Icon className="h-4 w-4" />
