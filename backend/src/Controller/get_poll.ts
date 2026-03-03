@@ -1,13 +1,13 @@
 import type { ServerResponse } from "node:http";
-import type { customRequest } from "../global";
 import { dbClient } from "../db/db";
 import { eq } from "drizzle-orm";
 import { poll, pollOption } from "../db/schema";
+import type { Request } from "express";
 
 
-export const getPoll = async (req: customRequest, res: ServerResponse) => {
+export const getPoll = async (req: Request, res: ServerResponse) => {
     try {
-        const id = req.queryparams.get("p");
+        const id = req.query.p
 
         if (!id) {
             res.writeHead(400, { "Content-Type": "application/json" });
@@ -16,7 +16,7 @@ export const getPoll = async (req: customRequest, res: ServerResponse) => {
         }
         const client = dbClient.getInstance();
 
-        const res_poll = await client.select().from(poll).where(eq(poll.id, id)).leftJoin(pollOption, eq(pollOption.pollId, poll.id))
+        const res_poll = await client.select().from(poll).where(eq(poll.id, id as string)).leftJoin(pollOption, eq(pollOption.pollId, poll.id))
 
         if (!res_poll) {
             res.writeHead(404, { "Content-Type": "application/json" });

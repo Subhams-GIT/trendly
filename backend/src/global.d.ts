@@ -1,26 +1,9 @@
-import { IncomingMessage } from "http"
-
-import "http";
-
-declare module "http" {
-
-  interface CustomRequest extends IncomingMessage {
-    params?: Record<string, string>;
-    queryparams?: Record<string, string>;
-    body?: any;
-    customProperty?: string;
+declare global {
+  namespace Express {
+    interface Request {
+      user?:JWTPayload
+    }
   }
-}
-
-export interface customRequest extends IncomingMessage {
-    body: any,
-    user?: {
-        id: string,
-        name: string,
-        email: string,
-    },
-    queryparams?: Map<string, string>,
-    searchparams?: { [key: string]: string };
 }
 
 export type JWTPayload = {

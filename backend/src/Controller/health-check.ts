@@ -1,8 +1,7 @@
-import { IncomingMessage, ServerResponse } from 'http';
-import type { customRequest } from '../global';
+import type { Request, Response } from "express";
 
-export async function healthCheckController(req: customRequest, res: ServerResponse): Promise<void> {
-    console.log({url:req.url,body:req.body,queryparams:req.queryparams});
+export async function healthCheckController(req: Request, res: Response): Promise<void> {
+    console.log({url:req.url,body:req.body,queryparams:req.query});
     if (req.url === '/health' && req.method === 'GET') {
         const healthStatus = {
             status: 'healthy',

@@ -1,13 +1,14 @@
 import type { ServerResponse } from "node:http";
-import type { customRequest } from "../global";
+
 import { dbClient } from "../db/db";
 import { poll, pollOption } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { type FlatPoll,type NestedPoll } from "../types/types";
+import type { Request, Response } from "express";
 
-export async function get_all_polls(req: customRequest, res: ServerResponse) { // function to get all polls creted by user
+export async function get_all_polls(req: Request, res: Response) { // function to get all polls creted by user
     try {
-        
+
         const user = req.user;
         if (!user?.id) throw new Error("user id not found!");
         console.log("fetching polls for user:", user.id);
@@ -44,21 +45,13 @@ export async function get_all_polls(req: customRequest, res: ServerResponse) { /
             }
             return acc;
         }, []);
-        res.writeHead(200, {
-            "Content-type": "application/json"
+        res.json({
+            polls:nestedPolls
         })
-        res.write(JSON.stringify({
-            polls: nestedPolls
-        }))
-        res.end();
     } catch (e) {
         console.error("polls not found", e);
-        res.writeHead(500, {
-            "Content-type": "application/json"
-        })
-        res.write(JSON.stringify({
-            message: "polls not found"
-        }))
-        res.end();
+       res.json({
+        message:"polls not found"
+       })
     }
 }

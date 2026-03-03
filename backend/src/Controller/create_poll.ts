@@ -1,11 +1,11 @@
 import type { ServerResponse } from "node:http";
-import type { customRequest } from "../global";
 import { dbClient } from "../db/db";
 import { poll, pollOption, private_users_poll, question, usersTable } from "../db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { pollOption as po, visibility as v } from "../types/types";
 import { randomBytes } from "node:crypto";
-export async function create_poll(req: customRequest, response: ServerResponse) {
+import type { Request, Response } from "express";
+export async function create_poll(req: Request, response: Response) {
     try {
         const user = req.user;
         if (!user?.id) throw new Error("user id not found!");
@@ -53,14 +53,11 @@ export async function create_poll(req: customRequest, response: ServerResponse) 
                 const inserted_options = await tx.insert(pollOption).values(poll_options);
                 console.log(inserted_options);
             })
+            response.status(200).json({
+                message:"poll created"
+            })
         }
-        response.writeHead(200, {
-            "content-type": "application/json"
-        })
-        response.write(JSON.stringify({
-            message: "poll created!"
-        }))
-        response.end();
+
     } catch (error) {
         console.error("poll not created", error);
         response.writeHead(500, {

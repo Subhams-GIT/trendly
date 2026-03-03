@@ -1,10 +1,10 @@
 import type { ServerResponse } from "node:http";
 import { dbClient } from "../db/db";
-import type { customRequest } from "../global";
 import { poll, pollOption, vote } from "../db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getOrCreateAnonToken } from "../utils/gettoken";
-export async function vote_poll(req: customRequest, res: ServerResponse) {
+import type { Request } from "express";
+export async function vote_poll(req: Request, res: ServerResponse) {
     try {
         const { pollID, response , mode } = req.body;
 

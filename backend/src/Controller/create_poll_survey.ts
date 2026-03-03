@@ -1,14 +1,15 @@
 import { ServerResponse } from "http";
-import type { customRequest } from "../global";
+
 import { dbClient } from "../db/db";
 import { survey, usersTable, questionOption, question, private_users_survey } from "../db/schema";
 import { type question as qu } from "../types/types";
 import { eq, inArray } from "drizzle-orm";
 import { randomBytes } from "crypto";
+import type { Request, Response } from "express";
 type OptionInsert = typeof questionOption.$inferInsert;
-import { sendTestEmail } from "../nodemiailer/send";
 
-export async function create_survey(req: customRequest, response: ServerResponse) {
+
+export async function create_survey(req: Request, response: Response) {
     try {
         const user = req.user;
         console.log({user})
@@ -80,26 +81,20 @@ export async function create_survey(req: customRequest, response: ServerResponse
                 await tx.insert(questionOption).values(options);
                 return newSurvey?.token
             })
-        response.writeHead(200, {
-            'content-type': 'application/json'
-        })
-        response.write(JSON.stringify({
-            message: "survey created",
+        response.json({
+            message:"survey created",
             link:token
-        }))
-        response.end()
+        })
     } catch (error) {
         console.error(error);
-        response.writeHead(500);
-        response.write(JSON.stringify({
-            message: error
-        }))
-        response.end();
+        response.status(400).json({
+            error
+        })
     }
 }
 
 
-export const get_Survey = async (req: customRequest, res: ServerResponse) => { // function to get all surveys created by user
+export const get_Survey = async (req: Request, res: Response) => { // function to get all surveys created by user
     try {
         const userid: string | undefined = req.user?.id;
         // console.log(req.url);
@@ -117,19 +112,13 @@ export const get_Survey = async (req: customRequest, res: ServerResponse) => { /
             res.end(JSON.stringify({ error: "Survey not found" }));
             return;
         }
-        res.writeHead(200, {
-            "content-type": "application/json"
+        res.json({
+            survey
         })
-        res.write(JSON.stringify({
-            survey: surveys
-        }))
-        res.end();
     } catch (error) {
         console.error("poll not created", error);
-        res.writeHead(500, {
-            message: error as string
+        res.status(400).json({
+            error
         })
-        res.write(JSON.stringify({ error }))
-        res.end();
     }
 }

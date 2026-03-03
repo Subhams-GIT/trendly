@@ -1,12 +1,13 @@
 import type { ServerResponse } from "http";
-import type { customRequest } from "../global";
+
 import { dbClient } from "../db/db";
 import { usersTable } from "../db/schema";
 import { randomBytes, randomUUID } from "crypto";
 import { ApiError } from "../error/custom_error";
 import { eq } from "drizzle-orm";
+import type { Request, Response } from "express";
 
-export async function sign_in(req: customRequest, res: ServerResponse) {
+export async function sign_in(req: Request, res: Response) {
     try {
 
         const client = dbClient.getInstance();
