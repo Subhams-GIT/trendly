@@ -1,49 +1,43 @@
-import { createClient, type RedisClientType } from "redis";
+import type { NextFunction, Request, Response } from "express";
+import moment from "moment";
+import { getRedis } from "../config/redis";
+export async function tokenbasedRateLimiter(_req: Request, res: Response, next: NextFunction) {
+    const bucketkey = "bucket"
+    const redis = getRedis();
 
-class Redis {
-    private static instance: Redis;
-    private static client: RedisClientType;
+    const capacity = 10
 
-    private constructor() { }
+    const interval = 1
 
-    public init(url: string) {
-        Redis.client = createClient({ url });
-        return Redis.client;
+    const currentTime = moment().unix();
+
+    const exists = await redis.exists(bucketkey)
+
+    if (!exists) {
+        await redis.hmset(bucketkey, {
+            capacity: capacity,
+            tokens: capacity,
+            lastRefillTime: currentTime,
+        })
     }
-    static getInstance() {
-        if (!Redis.instance) Redis.instance = new Redis();
-        return Redis.instance;
+    const info = await redis.hgetall(bucketkey)
+    const elapsedTime = currentTime - parseInt(info.lastRefillTime as string)
+
+    const tokensToAdd = elapsedTime * interval;
+    const newTokens = Math.min(capacity, parseInt(info.tokens as string) + tokensToAdd);
+    await redis.hmset(bucketkey, {
+        tokens: newTokens,
+        lastRefillTime: currentTime,
+    });
+    
+    if(parseInt(info.tokens as string)>0){
+        await redis.hset(bucketkey,'tokens',parseInt(info.tokens as string))
+        next();
+    }else{
+        res.status(429).json({
+            sucess:false,
+            message:"rate limit exceed"
+        })
     }
-    public getRedisClient() {
-        return Redis.client;
-    }
+
 }
-
-
-export class TokenBucket {
-
-    public capacity
-    public tokens
-    private redis_client
-    constructor(capacity: number, fillPerSecond: number) {
-        this.capacity = capacity;
-        this.tokens = capacity;
-        this.redis_client=Redis.getInstance();
-    }
-
-    addToken() {
-        if (this.tokens < this.capacity) {
-            this.tokens += 1;
-        }
-    }
-
-    take() {
-        if (this.tokens > 0) {
-            this.tokens -= 1;
-            return true;
-        }
-        return false;
-    }
-}
-
-export default Redis.getInstance();

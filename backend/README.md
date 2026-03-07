@@ -7,4 +7,19 @@
 6. /create-poll -> private
 7. /vote-poll  ->public
 8. /vote-poll -> private
-9. /get-survey -> public 
+9. /get-survey -> public
+
+{
+    "title":"sample survey",
+    "description":"description",
+    "state":"open",
+    "visibility":"public",
+    "expiry":5,
+    "Questions":[
+        {
+            "statement":"what is your name?",
+            "option":["subham","souvik"],
+            "type":"single"
+        }
+    ]
+}

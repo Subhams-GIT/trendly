@@ -40,7 +40,7 @@ export default async function authenticate(
 
     req.user = payload;
 
-    next(); 
+    next();
   } catch (error) {
     console.error("Auth error:", error);
 

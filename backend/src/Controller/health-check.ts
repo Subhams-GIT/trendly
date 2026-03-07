@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 
 export async function healthCheckController(req: Request, res: Response): Promise<void> {
     console.log({url:req.url,body:req.body,queryparams:req.query});
+    req.setMaxListeners(20)
     if (req.url === '/health' && req.method === 'GET') {
         const healthStatus = {
             status: 'healthy',

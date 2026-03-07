@@ -3,6 +3,7 @@
   "packageManager": "yarn@4.12.0",
   "type": "module",
   "scripts": {
+    "build": "tsc -b ",
     "push": "yarn drizzle-kit push",
     "generate": "yarn drizzle-kit generate",
     "dbml": "tsx ./src/dbml.ts",
@@ -11,6 +12,7 @@
   },
   "dependencies": {
     "@libsql/client": "^0.17.0",
+    "@upstash/redis": "^1.36.3",
     "busboy": "^1.6.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",

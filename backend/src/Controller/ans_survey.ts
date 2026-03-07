@@ -1,4 +1,3 @@
-
 import { dbClient } from "../db/db";
 import { eq } from "drizzle-orm";
 import { survey, surveySubmission, answer, private_users_survey } from "../db/schema";
@@ -27,7 +26,7 @@ export const ans_survey = async (req: Request, res: Response): Promise<void> => 
         console.log("snnfn")
         if (!survey_found || survey_found.state != "open") {
             res.json({
-                message: "survey error"
+                message: "survey closed"
             })
             return;
         }

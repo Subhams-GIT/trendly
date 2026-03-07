@@ -1,5 +1,3 @@
-import type { ServerResponse } from "node:http";
-
 import { dbClient } from "../db/db";
 import { poll, pollOption } from "../db/schema";
 import { eq } from "drizzle-orm";
@@ -11,9 +9,7 @@ export async function get_all_polls(req: Request, res: Response) { // function t
 
         const user = req.user;
         if (!user?.id) throw new Error("user id not found!");
-        console.log("fetching polls for user:", user.id);
         const client = dbClient.getInstance();
-        console.log("reached")
         const allPolls: FlatPoll[] = await client
             .select({
                 pollId: poll.id,

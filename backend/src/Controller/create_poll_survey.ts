@@ -1,5 +1,3 @@
-import { ServerResponse } from "http";
-
 import { dbClient } from "../db/db";
 import { survey, usersTable, questionOption, question, private_users_survey } from "../db/schema";
 import { type question as qu } from "../types/types";
@@ -12,84 +10,108 @@ type OptionInsert = typeof questionOption.$inferInsert;
 export async function create_survey(req: Request, response: Response) {
     try {
         const user = req.user;
-        console.log({user})
-        if (!user?.id) throw new Error("invaid user ");
+        if (!user?.id) throw new Error("invalid user");
 
         const client = dbClient.getInstance();
-            const { title, description, state, visibility, Questions, expiry, allowedUsers } = req.body;
-            const link = randomBytes(32).toString("hex");
-            const save_survey: typeof survey.$inferInsert = {
-                title,
-                description,
-                userId: user.id,
-                expiry: new Date(Date.now() + expiry * 24 * 60 * 60 * 1000),
-                state,
-                visibility,
-                link
-            };
-            const doesuser=await client.query.usersTable.findFirst({
-                where:eq(usersTable.id,user.id)
-            })
-            console.log(doesuser)
-           const token= await client.transaction(async tx => {
-                const [newSurvey] = await tx.insert(survey).values(save_survey).returning({ id: survey.id,token:survey.link });
-                const questions: typeof question.$inferInsert = Questions.map((q: qu) => ({
-                    question: q.statement,
-                    surveyId: newSurvey?.id,
-                    type: q.type,
-                }))
-                if(visibility==="private" && allowedUsers.length===0) throw new Error("upload users list for privacy!");
-                if (visibility === "private" && allowedUsers?.length>0) {
+        const { title, description, state, visibility, Questions, expiry, allowedUsers } = req.body;
 
-                    const users = await tx
-                        .select({ id: usersTable.id, email: usersTable.email })
-                        .from(usersTable)
-                        .where(inArray(usersTable.email, allowedUsers));
+        const link = randomBytes(32).toString("hex");
 
-                    if (users.length === 0) {
-                        throw new Error("No valid users found");
-                    }
+        const save_survey: typeof survey.$inferInsert = {
+            title,
+            description,
+            userId: user.id,
+            expiry: new Date(Date.now() + expiry * 24 * 60 * 60 * 1000),
+            state,
+            visibility,
+            link
+        };
 
-                    const allowedEntries = users.map(user => ({
-                        surveyId: newSurvey?.id as string,
-                        userId: user.id,
-                        // token: randomBytes(16).toString("hex")
-                    }));
-                    await tx.insert(private_users_survey).values(allowedEntries);
+        const token = await client.transaction(async tx => {
+
+            const [newSurvey] = await tx
+                .insert(survey)
+                .values(save_survey)
+                .returning({ id: survey.id, token: survey.link });
+
+            const questions: typeof question.$inferInsert[] = Questions.map((q: qu) => ({
+                question: q.statement,
+                surveyId: newSurvey?.id,
+                type: q.type
+            }));
+
+            if (visibility === "private" && (!allowedUsers || allowedUsers.length === 0)) {
+                throw new Error("upload users list for privacy!");
+            }
+
+            if (visibility === "private" && allowedUsers?.length > 0) {
+
+                const users = await tx
+                    .select({ id: usersTable.id, email: usersTable.email })
+                    .from(usersTable)
+                    .where(inArray(usersTable.email, allowedUsers));
+
+                if (users.length === 0) {
+                    throw new Error("No valid users found");
                 }
-                const inserted_Questions = await tx.insert(question).values(
-                    questions).returning({ id: question.id, type: question.type, text: question.question })
 
-                const options_questions = inserted_Questions.filter(iq =>
-                    iq.type !== "text"
-                );
+                const allowedEntries = users.map(user => ({
+                    surveyId: newSurvey?.id as string,
+                    userId: user.id
+                }));
 
-                let options: OptionInsert[] = [];
+                await tx.insert(private_users_survey).values(allowedEntries);
+            }
 
+            const insertedQuestions = await tx
+                .insert(question)
+                .values(questions)
+                .returning({
+                    id: question.id,
+                    type: question.type,
+                    text: question.question
+                });
+
+            // filter non-text questions
+            const optionQuestions = insertedQuestions.filter(q => q.type !== "text");
+
+            let options: OptionInsert[] = [];
+
+            if (optionQuestions.length > 0) {
                 Questions.forEach((q: qu) => {
-                    const current_question = q.statement;
-                    const res = options_questions.find(oq =>
-                        oq.text === current_question
+
+                    if (q.type.toString() === "text") return;
+
+                    const res = optionQuestions.find(oq =>
+                        oq.text === q.statement
                     );
-                    if (res) {
+
+                    if (res && q.option) {
                         options.push({
                             data: { ...q.option },
                             questionId: res.id
                         });
                     }
                 });
-                await tx.insert(questionOption).values(options);
-                return newSurvey?.token
-            })
+
+                if (options.length > 0) {
+                    await tx.insert(questionOption).values(options);
+                }
+            }
+
+            return newSurvey?.token;
+        });
+
         response.json({
-            message:"survey created",
-            link:token
-        })
+            message: "survey created",
+            link: token
+        });
+
     } catch (error) {
         console.error(error);
         response.status(400).json({
             error
-        })
+        });
     }
 }
 

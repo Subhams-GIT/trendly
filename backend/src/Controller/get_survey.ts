@@ -10,8 +10,7 @@ export const get_specific_Survey = async (req: Request, res: Response) => { // f
         // check for visibility
         // if public normally return it
         // else if private  then check whether user is allowed to see it or not
-        const url = u.parse(req.url as string)
-        const survey_token = url.query?.split('=')[1];
+        const survey_token=req.query.t as string;
         // req.queryparams?.set("token", surveytoken as string)
         // const survey_token = req.queryparamsparams?.token;
         if (!survey_token) throw new Error("invalid url");
